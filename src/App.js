@@ -1,18 +1,24 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import Task from './Task'
 import './App.css';
 
 class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      tasks: ['任务1', '任务2', '任务3', '任务4', '任务5', '任务6', '任务7', '任务8', '任务9']
+    }
+  }
   render() {
+    const tasks = this.state.tasks;
+    const count = tasks.length;
+
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        {tasks.map(
+          (task, index) => 
+            <Task key={task} count={count} index={index}>{task}</Task>
+        )}
       </div>
     );
   }
