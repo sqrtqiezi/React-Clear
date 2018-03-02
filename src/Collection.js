@@ -47,54 +47,73 @@ class Collection extends Component{
     };
   }
 
+  handleCheck(task) {
+    const { tasks } = this.state;
+
+    return () => {
+      task.done = true;
+      let order = 0;
+      for(let item of tasks) {
+        if (!item.done) {
+          item.order = order++;
+        } else if (item.done && item !== task) {
+          task.order = order;
+        }
+      }
+      this.setState({ tasks: tasks.sort((a, b) => a.order > b.order) });
+    }
+  }
+
+  handleCross(task) {
+    const { tasks } = this.state;
+
+    return () => {
+      tasks.splice(task.order, 1);
+
+      let order = 0;
+      for(let item of tasks) {
+        item.order = order++;
+      }
+      this.setState({ tasks });
+    }
+  }
+
+  handleUnCheck(task) {
+    const { tasks } = this.state;
+
+    return () => {
+      task.done = false;
+      let order = 0, placed = false;
+      for(let item of tasks) {
+        order++;
+        if (item.done) {
+          if (!placed) {
+            task.order = order;
+            placed = true;
+            order++
+          }
+          if (item !== task) {
+            item.order = order;
+          }
+        }
+      }
+      this.setState({ tasks: tasks.sort((a, b) => a.order > b.order) });
+    }
+  }
+
   render() {
-    const sortedTasks = this.state.tasks.sort((a, b) => a.order > b.order);
+    const { tasks } = this.state;
 
     return (<div>
-      {sortedTasks.map((task, index) => 
+      {tasks.map((task, index) => 
         <Item
           key={task.text}
-          count={sortedTasks.length}
+          count={tasks.length}
           index={index}
           done={task.done}
-          handleCheck={() => {
-            task.done = true;
-            let order = 0;
-            for(let item of sortedTasks) {
-              if (!item.done) {
-                item.order = order++;
-              } else if (item.done && item !== task) {
-                task.order = order;
-              }
-            }
-            this.setState({ tasks: sortedTasks });
-          }}
-          handleCross={() => {
-            sortedTasks.splice(index, 1);
-            let order = 0;
-            for(let item of sortedTasks) {
-              item.order = order++;
-            }
-            this.setState({ tasks: sortedTasks });
-          }}
-          handleUnCheck={() => {
-            task.done = false;
-            let order = 0, placed = false;
-            for(let item of sortedTasks) {
-              order++;
-              if (item.done) {
-                if (!placed) {
-                  task.order = order;
-                  placed = true;
-                  order++
-                }
-                if (item !== task) {
-                  item.order = order;
-                }
-              }
-            }
-            this.setState({ tasks: sortedTasks });
-          }}
+          handleCheck={this.handleCheck(task)}
+          handleCross={this.handleCross(task)}
+          handleUnCheck={this.handleUnCheck(task)}
         >
           {task.text}
         </Item>

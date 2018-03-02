@@ -117,7 +117,7 @@ class Item extends Component {
         }
       };
 
-      setTimeout(doStep, 500);
+      setTimeout(doStep, 300);
     }
   }
 
