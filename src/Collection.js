@@ -55,15 +55,21 @@ class Collection extends Component{
     const { tasks } = this.state;
 
     return () => {
-      task.done = true;
-      let order = 0;
-      for(let item of tasks) {
-        if (!item.done) {
-          item.order = order++;
-        } else if (item.done && item !== task) {
-          task.order = order;
+      const prevOrder = task.order
+
+      let i = task.order;
+      for(; i<tasks.length; i++) {
+        if (tasks[i].done) {
+          task.order = --i;
+          task.done = true;
+          break;
         }
       }
+
+      for(; i>prevOrder; i--) {
+        tasks[i].order--;
+      }
+
       this.setState({ tasks: tasks.sort((a, b) => a.order > b.order) });
       setTimeout(this.handlePositioning.bind(this), 0);
     }
@@ -88,21 +94,21 @@ class Collection extends Component{
     const { tasks } = this.state;
 
     return () => {
-      task.done = false;
-      let order = 0, placed = false;
-      for(let item of tasks) {
-        order++;
-        if (item.done) {
-          if (!placed) {
-            task.order = order;
-            placed = true;
-            order++
-          }
-          if (item !== task) {
-            item.order = order;
-          }
+      let prevOrder = task.order;
+      let i = 0;
+
+      for (; i<tasks.length; i++) {
+        if (tasks[i].done) {
+          task.done = false;
+          task.order = i;
+          break;
         }
       }
+
+      for (; i<prevOrder; i++) {
+        tasks[i].order++;
+      }
+
       this.setState({ tasks: tasks.sort((a, b) => a.order > b.order) });
       setTimeout(this.handlePositioning.bind(this), 0);
     }
@@ -110,7 +116,7 @@ class Collection extends Component{
 
   handlePositioning() {
     const { tasks } = this.state;
-    let count = 10;
+    let count = 12;
     const steps = [];
     const positions = [];
 
@@ -124,21 +130,26 @@ class Collection extends Component{
       }
     }
 
+    console.dir(positions);
+    console.dir(steps);
+
     const innerPositioning = () => {
       const { tasks } = this.state;
 
       requestAnimationFrame(() => {
         count--;
         for(let task of tasks) {
-          if (task.position !== positions[task.order]) {
-            task.position += steps[task.order];
-          }
+          task.position += steps[task.order];
         }
-        this.setState({ tasks });
 
         if (count > 0) {
           innerPositioning();
+        } else {
+          for(let task of tasks) {
+            task.position = positions[task.order]
+          }
         }
+        this.setState({ tasks });
       });
     };
 
