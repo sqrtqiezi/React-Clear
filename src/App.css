@@ -1,6 +1,8 @@
 .App {
-  text-align: center;
+  position: relative;
   width: 100%;
   height: 100%;
+  font-size: 1.2em;
   background-color: #010101;
+  overflow-x: hidden;
 }
