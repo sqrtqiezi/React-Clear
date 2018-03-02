@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import { ITEM_HEIGHT } from './constants'
 
 // 均匀的计算颜色渐变
 function _gradient(startColor, endColor, index, count) {
@@ -15,8 +16,8 @@ function _gradient(startColor, endColor, index, count) {
 }
 
 const StyledItem = styled.div.attrs({
-  style: ({ top }) => ({
-    transform: `translate3d(0px, ${top}px, 0px)`
+  style: ({ position }) => ({
+    transform: `translate3d(0px, ${position}px, 0px)`
   })
 })`
   position: absolute;
@@ -70,8 +71,6 @@ const ItemCross = ItemOperator.extend.attrs({
   right: 0;
 `;
 
-const ITEM_HEIGHT = 57;
-
 const ACTIONS = {
   NOOP: 0,
   CHECK: 1,
@@ -88,37 +87,12 @@ class Item extends Component {
       movingDistance: 0,
       checkOpacity: 0,
       crossOpacity: 0,
-      top: 0,
       placed: false,
       action: ACTIONS.NOOP
     }
     this.handlStart = this.handlStart.bind(this);
     this.handlMove = this.handlMove.bind(this);
     this.handleEnd = this.handleEnd.bind(this);
-  }
-
-  componentDidMount() {
-    this.setState({ top: this.props.index * ITEM_HEIGHT });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.index !== this.props.index) {
-      let count = 12;
-      const { top } = this.state;
-      const nextTop = nextProps.index * ITEM_HEIGHT;
-      const step = (nextTop - top) / count;
-
-      const doStep = () => {
-        count--;
-        const top = this.state.top + step;
-        this.setState({ top });
-        if (count > 0) {
-          requestAnimationFrame(doStep);
-        }
-      };
-
-      setTimeout(doStep, 300);
-    }
   }
 
   handlStart(e) {
@@ -215,12 +189,12 @@ class Item extends Component {
   }
 
   render() {
-    const { done } = this.props;
-    const { checkOpacity, top, movingDistance } = this.state;
+    const { done, position } = this.props;
+    const { checkOpacity, movingDistance } = this.state;
     const bgColor = this._calcBgColor(done, checkOpacity);
 
     return (
-      <StyledItem top={top}>
+      <StyledItem position={position}>
         <ItemSlider
           bgColor={bgColor}
           done={done}
