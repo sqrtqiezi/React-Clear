@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { ITEM_HEIGHT } from './constants'
+import { ITEM_HEIGHT, ACTIONS } from './constants'
 
 // 均匀的计算颜色渐变
 function _gradient(startColor, endColor, index, count) {
@@ -73,13 +73,6 @@ const ItemCross = ItemOperator.extend.attrs({
 })`
   right: 0;
 `;
-
-const ACTIONS = {
-  NOOP: 0,
-  CHECK: 1,
-  CROSS: 2,
-  UNCHECK: 3
-}
 
 class Item extends Component {
   constructor() {
