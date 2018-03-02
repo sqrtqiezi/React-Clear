@@ -50,7 +50,10 @@ const ItemText = styled.span`
 `
 
 const ItemOperator = styled.img.attrs({
-  style: ({ opacity }) => ({ opacity })
+  style: ({ opacity, movingDistance }) => ({
+    opacity,
+    transform: `translate3d(${movingDistance}px, 0px, 0px)`
+  })
 })`
   position: absolute;
   z-index: 0;
@@ -84,7 +87,9 @@ class Item extends Component {
     this.state = {
       isMoving: false,
       movingStart: 0,
-      movingDistance: 0,
+      sliderDistance: 0,
+      checkDistance: 0,
+      crossDistance: 0,
       checkOpacity: 0,
       crossOpacity: 0,
       placed: false,
@@ -106,13 +111,14 @@ class Item extends Component {
     const bound = ITEM_HEIGHT;
 
     if(this.state.isMoving) {
-      let distance = e.touches[0].pageX - this.state.movingStart;
-      let { checkOpacity, crossOpacity, action } = this.state;
+      let sliderDistance = e.touches[0].pageX - this.state.movingStart;
+      let { checkOpacity, checkDistance, crossOpacity, crossDistance, action } = this.state;
 
-      if (distance > 0) {
+      if (sliderDistance > 0) {
         // right move : check
-        if (distance > bound) {
-          distance = bound + (distance - bound) / 3;
+        if (sliderDistance > bound) {
+          checkDistance = (sliderDistance - bound) / 3;
+          sliderDistance = bound + checkDistance;
           checkOpacity = 1;
           if (this.props.done) {
             action = ACTIONS.UNCHECK;
@@ -120,17 +126,18 @@ class Item extends Component {
             action = ACTIONS.CHECK;
           }
         } else {
-          checkOpacity = distance / bound;
+          checkOpacity = sliderDistance / bound;
           action = ACTIONS.NOOP;
         }
       } else {
         // left move : cross
-        if (Math.abs(distance) > bound) {
-          distance = (distance + bound) / 3 - bound;
+        if (Math.abs(sliderDistance) > bound) {
+          crossDistance = (sliderDistance + bound) / 3;
+          sliderDistance =  crossDistance - bound;
           crossOpacity = 1;
           action = ACTIONS.CROSS;
         } else {
-          crossOpacity = Math.abs(distance / bound);
+          crossOpacity = Math.abs(sliderDistance / bound);
           action = ACTIONS.NOOP;
         }
       }
@@ -138,7 +145,9 @@ class Item extends Component {
         action,
         checkOpacity, 
         crossOpacity,
-        movingDistance: distance
+        sliderDistance,
+        checkDistance,
+        crossDistance
       });
     }
   }
@@ -161,7 +170,7 @@ class Item extends Component {
 
       this.setState({
         isMoving: false,
-        movingDistance: 0,
+        sliderDistance: 0,
         checkOpacity: 0,
         action: ACTIONS.NOOP
       });
@@ -190,7 +199,7 @@ class Item extends Component {
 
   render() {
     const { done, position } = this.props;
-    const { checkOpacity, movingDistance } = this.state;
+    const { checkOpacity, sliderDistance, checkDistance, crossDistance } = this.state;
     const bgColor = this._calcBgColor(done, checkOpacity);
 
     return (
@@ -199,15 +208,23 @@ class Item extends Component {
           bgColor={bgColor}
           done={done}
           opacity={checkOpacity}
-          movingDistance={movingDistance}
+          movingDistance={sliderDistance}
           onTouchStart={this.handlStart}
           onTouchMove={this.handlMove}
           onTouchEnd={this.handleEnd}
         >
           <ItemText done={done} opacity={checkOpacity}>{this.props.children}</ItemText>
         </ItemSlider>
-        <ItemCheck width={ITEM_HEIGHT} opacity={this.state.checkOpacity} />
-        <ItemCross width={ITEM_HEIGHT} opacity={this.state.crossOpacity} />
+        <ItemCheck
+          width={ITEM_HEIGHT} 
+          movingDistance={checkDistance}
+          opacity={this.state.checkOpacity}
+        />
+        <ItemCross
+          width={ITEM_HEIGHT}
+          movingDistance={crossDistance}
+          opacity={this.state.crossOpacity}
+        />
       </StyledItem>
     );
   }
